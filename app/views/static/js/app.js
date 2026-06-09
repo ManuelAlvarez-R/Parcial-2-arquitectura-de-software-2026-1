@@ -58,6 +58,50 @@ function renderInventario(data) {
         </table>`;
 }
 
+function crearOpcionesAlmacen(almacenes, incluirPlaceholder = true) {
+    const opciones = incluirPlaceholder
+        ? ['<option value="">Seleccione un almacén...</option>']
+        : [];
+
+    almacenes.forEach((almacen) => {
+        opciones.push(
+            `<option value="${almacen.id}">ID ${almacen.id} — ${almacen.nombre}</option>`
+        );
+    });
+
+    return opciones.join("");
+}
+
+function actualizarSelectsAlmacen(almacenes) {
+    const consultaSelect = document.getElementById("sede-id");
+    const registroSelect = document.getElementById("registro-almacen-id");
+    const consultaActual = consultaSelect.value;
+    const registroActual = registroSelect.value;
+
+    consultaSelect.innerHTML = crearOpcionesAlmacen(almacenes, almacenes.length === 0);
+    registroSelect.innerHTML = crearOpcionesAlmacen(almacenes);
+
+    if (consultaActual) {
+        consultaSelect.value = consultaActual;
+    } else if (almacenes.length) {
+        consultaSelect.value = String(almacenes[0].id);
+    }
+
+    if (registroActual) {
+        registroSelect.value = registroActual;
+    }
+}
+
+const QUERY_ALMACENES = `
+    query Almacenes {
+        almacenes {
+            id
+            nombre
+            direccion
+        }
+    }
+`;
+
 const QUERY_INVENTARIO = `
     query InventarioPorSede($sedeId: Int!) {
         inventarioPorSede(sedeId: $sedeId) {
@@ -74,6 +118,19 @@ const QUERY_INVENTARIO = `
                     categoria
                     precioUnitario
                 }
+            }
+        }
+    }
+`;
+
+const MUTATION_ALMACEN = `
+    mutation RegistrarAlmacen($datos: RegistroAlmacenInput!) {
+        registrarAlmacen(datos: $datos) {
+            mensaje
+            almacen {
+                id
+                nombre
+                direccion
             }
         }
     }
@@ -96,10 +153,32 @@ const MUTATION_REGISTRAR = `
     }
 `;
 
+async function cargarAlmacenes() {
+    const payload = await ejecutarGraphQL(QUERY_ALMACENES);
+
+    if (payload.errors) {
+        document.getElementById("sede-id").innerHTML =
+            '<option value="">No se pudieron cargar los almacenes</option>';
+        document.getElementById("registro-almacen-id").innerHTML =
+            '<option value="">No se pudieron cargar los almacenes</option>';
+        return [];
+    }
+
+    const almacenes = payload.data.almacenes;
+    actualizarSelectsAlmacen(almacenes);
+    return almacenes;
+}
+
 document.getElementById("form-consulta").addEventListener("submit", async (event) => {
     event.preventDefault();
     const sedeId = Number(document.getElementById("sede-id").value);
     const resultado = document.getElementById("resultado-consulta");
+
+    if (!sedeId) {
+        mostrarResultado(resultado, "Seleccione una sede de almacén.", "error");
+        return;
+    }
+
     mostrarResultado(resultado, "Consultando inventario...");
 
     try {
@@ -120,18 +199,61 @@ document.getElementById("form-consulta").addEventListener("submit", async (event
     }
 });
 
+document.getElementById("form-almacen").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const resultado = document.getElementById("resultado-almacen");
+
+    const datos = {
+        almacenId: Number(document.getElementById("almacen-id").value),
+        nombre: document.getElementById("almacen-nombre").value.trim(),
+        direccion: document.getElementById("almacen-direccion").value.trim(),
+    };
+
+    mostrarResultado(resultado, "Guardando almacén...");
+
+    try {
+        const payload = await ejecutarGraphQL(MUTATION_ALMACEN, { datos });
+
+        if (payload.errors) {
+            mostrarResultado(resultado, formatearErrorGraphQL(payload), "error");
+            return;
+        }
+
+        const data = payload.data.registrarAlmacen;
+        mostrarResultado(
+            resultado,
+            `${data.mensaje}\n\nID: ${data.almacen.id}\nNombre: ${data.almacen.nombre}\nDirección: ${data.almacen.direccion}`,
+            "success"
+        );
+
+        await cargarAlmacenes();
+        document.getElementById("sede-id").value = String(data.almacen.id);
+        document.getElementById("registro-almacen-id").value = String(data.almacen.id);
+    } catch (error) {
+        mostrarResultado(resultado, error.message, "error");
+    }
+});
+
 document.getElementById("form-registro").addEventListener("submit", async (event) => {
     event.preventDefault();
     const resultado = document.getElementById("resultado-registro");
+    const almacenId = Number(document.getElementById("registro-almacen-id").value);
+
+    if (!almacenId) {
+        mostrarResultado(
+            resultado,
+            "Seleccione un almacén. Si no existe, regístrelo primero en la sección anterior.",
+            "error"
+        );
+        return;
+    }
 
     const datos = {
         productoNombre: document.getElementById("producto-nombre").value.trim(),
         productoDescripcion: document.getElementById("producto-descripcion").value.trim() || null,
         productoPrecioUnitario: Number(document.getElementById("producto-precio").value),
         productoCategoria: document.getElementById("producto-categoria").value.trim(),
-        almacenId: Number(document.getElementById("almacen-id").value),
-        almacenNombre: document.getElementById("almacen-nombre").value.trim(),
-        almacenDireccion: document.getElementById("almacen-direccion").value.trim(),
+        almacenId,
         cantidadInicial: Number(document.getElementById("cantidad-inicial").value),
     };
 
@@ -152,8 +274,11 @@ document.getElementById("form-registro").addEventListener("submit", async (event
             "success"
         );
         event.target.reset();
-        document.getElementById("almacen-id").value = datos.almacenId;
+        document.getElementById("registro-almacen-id").value = String(almacenId);
+        document.getElementById("cantidad-inicial").value = "0";
     } catch (error) {
         mostrarResultado(resultado, error.message, "error");
     }
 });
+
+cargarAlmacenes();

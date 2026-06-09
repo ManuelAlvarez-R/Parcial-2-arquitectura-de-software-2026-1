@@ -131,6 +131,17 @@ Para eliminar también los datos persistentes:
 docker compose down -v
 ```
 
+### Solución de problemas
+
+Si aparece el error `Host '...' is not allowed to connect to this MySQL server`:
+
+```bash
+docker compose down -v
+docker compose up --build
+```
+
+El servicio `db-setup` reconfigura los permisos del usuario `inventario_user` en cada arranque.
+
 ## Esquema GraphQL
 
 ### Tipos

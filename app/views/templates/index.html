@@ -10,58 +10,65 @@
     <header class="header">
         <div class="container">
             <h1>{{ titulo }}</h1>
-            <p>Sistema monolítico MVC · GraphQL · FastAPI · MySQL · Docker</p>
+            <p>Sistema de gestión de inventario</p>
         </div>
     </header>
 
     <main class="container">
-        <section class="card">
+        <section class="card card-wide">
             <h2>Consultar inventario por sede</h2>
             <p class="subtitle">Obtiene productos y cantidades disponibles en un almacén.</p>
-            <form id="form-consulta" class="form-grid">
-                <label for="sede-id">ID de sede de almacén</label>
-                <input type="number" id="sede-id" name="sede-id" min="1" value="1" required>
+            <form id="form-consulta" class="form-grid form-inline">
+                <label for="sede-id">Sede de almacén</label>
+                <select id="sede-id" name="sede-id" required>
+                    <option value="">Cargando almacenes...</option>
+                </select>
                 <button type="submit" class="btn btn-primary">Consultar inventario</button>
             </form>
             <div id="resultado-consulta" class="resultado"></div>
         </section>
 
         <section class="card">
+            <h2>Registrar almacén</h2>
+            <p class="subtitle">Crea una nueva sede o actualiza una existente por su ID.</p>
+            <form id="form-almacen" class="form-grid">
+                <label for="almacen-id">ID de sede</label>
+                <input type="number" id="almacen-id" min="1" required>
+
+                <label for="almacen-nombre">Nombre del almacén</label>
+                <input type="text" id="almacen-nombre" required>
+
+                <label for="almacen-direccion">Dirección</label>
+                <input type="text" id="almacen-direccion" required>
+
+                <button type="submit" class="btn btn-secondary">Guardar almacén</button>
+            </form>
+            <div id="resultado-almacen" class="resultado"></div>
+        </section>
+
+        <section class="card">
             <h2>Registrar producto en inventario</h2>
-            <p class="subtitle">Crea un producto y lo asocia a una sede con cantidad inicial.</p>
+            <p class="subtitle">Asocia un producto a un almacén ya registrado con su cantidad inicial.</p>
             <form id="form-registro" class="form-grid">
-                <fieldset>
-                    <legend>Producto</legend>
-                    <label for="producto-nombre">Nombre</label>
-                    <input type="text" id="producto-nombre" required>
+                <label for="registro-almacen-id">Almacén destino</label>
+                <select id="registro-almacen-id" required>
+                    <option value="">Seleccione un almacén...</option>
+                </select>
 
-                    <label for="producto-descripcion">Descripción</label>
-                    <textarea id="producto-descripcion" rows="2"></textarea>
+                <label for="producto-nombre">Nombre del producto</label>
+                <input type="text" id="producto-nombre" required>
 
-                    <label for="producto-precio">Precio unitario</label>
-                    <input type="number" id="producto-precio" step="0.01" min="0.01" required>
+                <label for="producto-descripcion">Descripción</label>
+                <textarea id="producto-descripcion" rows="2"></textarea>
 
-                    <label for="producto-categoria">Categoría</label>
-                    <input type="text" id="producto-categoria" required>
-                </fieldset>
+                <label for="producto-precio">Precio unitario</label>
+                <input type="number" id="producto-precio" step="0.01" min="0.01" required>
 
-                <fieldset>
-                    <legend>Almacén</legend>
-                    <label for="almacen-id">ID de sede</label>
-                    <input type="number" id="almacen-id" min="1" value="1" required>
+                <label for="producto-categoria">Categoría</label>
+                <input type="text" id="producto-categoria" required>
 
-                    <label for="almacen-nombre">Nombre</label>
-                    <input type="text" id="almacen-nombre" required>
-
-                    <label for="almacen-direccion">Dirección</label>
-                    <input type="text" id="almacen-direccion" required>
-                </fieldset>
-
-                <fieldset>
-                    <legend>Inventario</legend>
-                    <label for="cantidad-inicial">Cantidad inicial en stock</label>
-                    <input type="number" id="cantidad-inicial" min="0" value="0" required>
-                </fieldset>
+                <label for="cantidad-inicial">Cantidad inicial en stock</label>
+                <input type="number" id="cantidad-inicial" min="0" value="0" required>
 
                 <button type="submit" class="btn btn-success">Registrar producto</button>
             </form>

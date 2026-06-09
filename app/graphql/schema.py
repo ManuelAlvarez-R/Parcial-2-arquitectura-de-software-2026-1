@@ -6,19 +6,26 @@ from strawberry.schema.config import StrawberryConfig
 from app.exceptions import AlmacenNoEncontradoError
 from app.graphql.context import GraphQLContext
 from app.graphql.types import (
+    AlmacenType,
     InventarioItemType,
     InventarioPorSedeType,
     ProductoType,
+    RegistroAlmacenInput,
+    RegistroAlmacenResult,
     RegistroInventarioInput,
     RegistroInventarioResult,
-    AlmacenType,
 )
-from app.schemas.inventario import RegistroInventarioRequest
+from app.schemas.inventario import RegistroAlmacenRequest, RegistroInventarioRequest
 from app.services.inventario_service import InventarioService
 
 
 @strawberry.type
 class Query:
+    @strawberry.field(description="Lista todas las sedes de almacén registradas")
+    def almacenes(self, info: strawberry.Info[GraphQLContext, None]) -> list[AlmacenType]:
+        service = InventarioService(info.context.db)
+        return [AlmacenType.from_model(almacen) for almacen in service.listar_almacenes()]
+
     @strawberry.field(description="Obtiene productos y cantidades de una sede de almacén")
     def inventario_por_sede(
         self, info: strawberry.Info[GraphQLContext, None], sede_id: int
@@ -43,7 +50,26 @@ class Query:
 
 @strawberry.type
 class Mutation:
-    @strawberry.mutation(description="Registra un producto en el inventario de un almacén")
+    @strawberry.mutation(description="Crea o actualiza una sede de almacén")
+    def registrar_almacen(
+        self,
+        info: strawberry.Info[GraphQLContext, None],
+        datos: RegistroAlmacenInput,
+    ) -> RegistroAlmacenResult:
+        service = InventarioService(info.context.db)
+        try:
+            request = RegistroAlmacenRequest.model_validate(datos.__dict__)
+        except ValidationError as error:
+            raise GraphQLError(error.errors()[0]["msg"]) from error
+
+        resultado = service.registrar_almacen(request)
+
+        return RegistroAlmacenResult(
+            mensaje=resultado.mensaje,
+            almacen=AlmacenType.from_model(resultado.almacen),
+        )
+
+    @strawberry.mutation(description="Registra un producto en el inventario de un almacén existente")
     def registrar_producto(
         self,
         info: strawberry.Info[GraphQLContext, None],
@@ -55,7 +81,10 @@ class Mutation:
         except ValidationError as error:
             raise GraphQLError(error.errors()[0]["msg"]) from error
 
-        resultado = service.registrar_producto_en_inventario(request)
+        try:
+            resultado = service.registrar_producto_en_inventario(request)
+        except AlmacenNoEncontradoError as error:
+            raise GraphQLError(str(error)) from error
 
         return RegistroInventarioResult(
             mensaje=resultado.mensaje,

@@ -68,6 +68,19 @@ class InventarioType:
         )
 
 
+@strawberry.input(name="RegistroAlmacenInput")
+class RegistroAlmacenInput:
+    almacen_id: int
+    nombre: str
+    direccion: str
+
+
+@strawberry.type(name="RegistroAlmacenResponse")
+class RegistroAlmacenResult:
+    mensaje: str
+    almacen: AlmacenType
+
+
 @strawberry.input(name="RegistroInventarioInput")
 class RegistroInventarioInput:
     producto_nombre: str
@@ -75,8 +88,6 @@ class RegistroInventarioInput:
     producto_precio_unitario: Decimal
     producto_categoria: str
     almacen_id: int
-    almacen_nombre: str
-    almacen_direccion: str
     cantidad_inicial: int
 
 

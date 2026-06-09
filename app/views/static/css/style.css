@@ -5,6 +5,8 @@
     --primary-dark: #1d4ed8;
     --success: #16a34a;
     --success-dark: #15803d;
+    --secondary: #475569;
+    --secondary-dark: #334155;
     --text: #1e293b;
     --muted: #64748b;
     --border: #e2e8f0;
@@ -89,7 +91,8 @@ label {
 }
 
 input,
-textarea {
+textarea,
+select {
     width: 100%;
     padding: 0.65rem 0.75rem;
     border: 1px solid var(--border);
@@ -98,7 +101,8 @@ textarea {
 }
 
 input:focus,
-textarea:focus {
+textarea:focus,
+select:focus {
     outline: 2px solid rgba(37, 99, 235, 0.25);
     border-color: var(--primary);
 }
@@ -127,6 +131,23 @@ textarea:focus {
 
 .btn-success:hover {
     background: var(--success-dark);
+}
+
+.btn-secondary {
+    background: var(--secondary);
+}
+
+.btn-secondary:hover {
+    background: var(--secondary-dark);
+}
+
+.card-wide {
+    grid-column: 1 / -1;
+}
+
+.form-inline {
+    grid-template-columns: auto 1fr auto;
+    align-items: end;
 }
 
 .resultado {
@@ -196,5 +217,11 @@ th {
 
     .card {
         margin-bottom: 0;
+    }
+}
+
+@media (max-width: 767px) {
+    .form-inline {
+        grid-template-columns: 1fr;
     }
 }

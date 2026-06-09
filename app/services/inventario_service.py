@@ -5,6 +5,8 @@ from app.models import Almacen, Inventario, Producto
 from app.schemas.inventario import (
     InventarioItemResponse,
     InventarioPorSedeResponse,
+    RegistroAlmacenRequest,
+    RegistroAlmacenResponse,
     RegistroInventarioRequest,
     RegistroInventarioResponse,
 )
@@ -32,21 +34,36 @@ class InventarioService:
 
         return InventarioPorSedeResponse(almacen=almacen, items=items)
 
+    def listar_almacenes(self) -> list[Almacen]:
+        return self.db.query(Almacen).order_by(Almacen.id).all()
+
+    def registrar_almacen(self, datos: RegistroAlmacenRequest) -> RegistroAlmacenResponse:
+        almacen = self.db.query(Almacen).filter(Almacen.id == datos.almacen_id).first()
+
+        if almacen:
+            almacen.nombre = datos.nombre
+            almacen.direccion = datos.direccion
+            mensaje = "Almacén actualizado correctamente"
+        else:
+            almacen = Almacen(
+                id=datos.almacen_id,
+                nombre=datos.nombre,
+                direccion=datos.direccion,
+            )
+            self.db.add(almacen)
+            mensaje = "Almacén creado correctamente"
+
+        self.db.commit()
+        self.db.refresh(almacen)
+
+        return RegistroAlmacenResponse(mensaje=mensaje, almacen=almacen)
+
     def registrar_producto_en_inventario(
         self, datos: RegistroInventarioRequest
     ) -> RegistroInventarioResponse:
         almacen = self.db.query(Almacen).filter(Almacen.id == datos.almacen_id).first()
-
-        if almacen:
-            almacen.nombre = datos.almacen_nombre
-            almacen.direccion = datos.almacen_direccion
-        else:
-            almacen = Almacen(
-                id=datos.almacen_id,
-                nombre=datos.almacen_nombre,
-                direccion=datos.almacen_direccion,
-            )
-            self.db.add(almacen)
+        if not almacen:
+            raise AlmacenNoEncontradoError(datos.almacen_id)
 
         producto = Producto(
             nombre=datos.producto_nombre,
