@@ -11,91 +11,8 @@ Servicio web monolítico con arquitectura **Modelo-Vista-Controlador (MVC)** des
 | Consultar inventario por sede de almacén | `inventarioPorSede(sedeId)` | `Query` |
 | Registrar producto en inventario | `registrarProducto(datos)` | `Mutation` |
 
-## Arquitectura MVC (Monolito)
 
-```mermaid
-flowchart TB
-    subgraph Cliente
-        FE[Frontend HTML/JS/CSS]
-        GQL[GraphiQL Playground]
-    end
 
-    subgraph Contenedor_API["Contenedor: inventario_api"]
-        subgraph Vista
-            TPL[Templates Jinja2]
-            STA[Archivos estáticos]
-        end
-        subgraph Controlador
-            GR[GraphQL Router]
-            SCH[Schema Query/Mutation]
-        end
-        subgraph Modelo
-            SVC[Inventario Service]
-            ORM[SQLAlchemy Models]
-        end
-        APP[FastAPI App]
-    end
-
-    subgraph Contenedor_DB["Contenedor: inventario_mysql"]
-        DB[(MySQL 8)]
-    end
-
-    FE -->|POST /graphql| APP
-    GQL -->|POST /graphql| APP
-    APP --> TPL
-    APP --> STA
-    APP --> GR
-    GR --> SCH
-    SCH --> SVC
-    SVC --> ORM
-    ORM --> DB
-```
-
-### Capas del proyecto
-
-```
-app/
-├── main.py                  # Punto de entrada y configuración FastAPI
-├── config.py                # Variables de entorno
-├── database.py              # Conexión y sesión MySQL
-├── models/                  # MODELO - Entidades ORM (Producto, Almacén, Inventario)
-├── schemas/                 # DTOs Pydantic (validación de entrada)
-├── services/                # Lógica de negocio
-├── graphql/                 # Esquema GraphQL (tipos, query, mutation)
-├── controllers/             # CONTROLADOR - GraphQL Router
-└── views/
-    ├── templates/           # VISTA - Plantillas HTML
-    └── static/              # VISTA - CSS y JavaScript
-```
-
-## Modelo relacional (MySQL)
-
-```mermaid
-erDiagram
-    PRODUCTOS ||--o{ INVENTARIO : tiene
-    ALMACENES ||--o{ INVENTARIO : almacena
-
-    PRODUCTOS {
-        int id PK
-        string nombre
-        text descripcion
-        decimal precio_unitario
-        string categoria
-    }
-
-    ALMACENES {
-        int id PK
-        string nombre
-        string direccion
-    }
-
-    INVENTARIO {
-        int id PK
-        int producto_id FK
-        int almacen_id FK
-        int cantidad
-    }
-```
 
 ## Despliegue con Docker
 
@@ -216,13 +133,6 @@ Al iniciar MySQL por primera vez se cargan:
 - **Sede 1:** Almacén Central Bogotá (3 productos)
 - **Sede 2:** Almacén Medellín Norte (2 productos)
 
-## Evidencias sugeridas para la entrega
-
-1. Captura del frontend en `http://localhost:8000` consultando la sede 1.
-2. Captura de GraphiQL (`/graphql`) ejecutando la mutation `registrarProducto`.
-3. Captura de la query `inventarioPorSede` con sede 2 y su respuesta JSON.
-4. Captura de `docker compose ps` con ambos contenedores en estado `running`.
-5. Diagrama de arquitectura (incluido en este README).
 
 ## Desarrollo local (sin Docker)
 
@@ -241,3 +151,7 @@ uvicorn app.main:app --reload
 ## Integrantes
 
 Equipo 4 — Arquitectura de Software
+Manuel Felipe Alvarez Rua
+Luis Carlos Vanegas Zapata
+Andrés Eduardo Pabón Roldán
+Estefanía Garcés Pérez
