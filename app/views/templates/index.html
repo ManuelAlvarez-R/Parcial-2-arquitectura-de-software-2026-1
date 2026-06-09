@@ -18,7 +18,7 @@
         <section class="card card-wide">
             <h2>Consultar inventario por sede</h2>
             <p class="subtitle">Obtiene productos y cantidades disponibles en un almacén.</p>
-            <form id="form-consulta" class="form-grid form-inline">
+            <form id="form-consulta" class="form-grid form-inline" accept-charset="UTF-8">
                 <label for="sede-id">Sede de almacén</label>
                 <select id="sede-id" name="sede-id" required>
                     <option value="">Cargando almacenes...</option>
@@ -31,7 +31,7 @@
         <section class="card">
             <h2>Registrar almacén</h2>
             <p class="subtitle">Crea una nueva sede o actualiza una existente por su ID.</p>
-            <form id="form-almacen" class="form-grid">
+            <form id="form-almacen" class="form-grid" accept-charset="UTF-8">
                 <label for="almacen-id">ID de sede</label>
                 <input type="number" id="almacen-id" min="1" required>
 
@@ -49,7 +49,7 @@
         <section class="card">
             <h2>Registrar producto en inventario</h2>
             <p class="subtitle">Asocia un producto a un almacén ya registrado con su cantidad inicial.</p>
-            <form id="form-registro" class="form-grid">
+            <form id="form-registro" class="form-grid" accept-charset="UTF-8">
                 <label for="registro-almacen-id">Almacén destino</label>
                 <select id="registro-almacen-id" required>
                     <option value="">Seleccione un almacén...</option>

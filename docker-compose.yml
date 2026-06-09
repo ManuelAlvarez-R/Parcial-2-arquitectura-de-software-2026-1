@@ -3,11 +3,13 @@ services:
     image: mysql:8.0
     container_name: inventario_mysql
     restart: unless-stopped
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     environment:
       MYSQL_ROOT_PASSWORD: root_password
       MYSQL_DATABASE: inventario_db
       MYSQL_USER: inventario_user
       MYSQL_PASSWORD: inventario_pass
+      LANG: C.UTF-8
     ports:
       - "3307:3306"
     volumes:
@@ -46,10 +48,17 @@ services:
           exit 1
         }
         echo "Configurando permisos de MySQL..."
-        mysql -h mysql -u root -proot_password <<-EOSQL
-          CREATE DATABASE IF NOT EXISTS inventario_db;
+        mysql --default-character-set=utf8mb4 -h mysql -u root -proot_password <<-EOSQL
+          SET NAMES utf8mb4;
+          CREATE DATABASE IF NOT EXISTS inventario_db
+            CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+          ALTER DATABASE inventario_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
           CREATE USER IF NOT EXISTS 'inventario_user'@'%' IDENTIFIED BY 'inventario_pass';
           GRANT ALL PRIVILEGES ON inventario_db.* TO 'inventario_user'@'%';
+          USE inventario_db;
+          ALTER TABLE productos CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+          ALTER TABLE almacenes CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+          ALTER TABLE inventario CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
           FLUSH PRIVILEGES;
         EOSQL
         echo "Permisos configurados correctamente."
@@ -66,6 +75,9 @@ services:
       DB_USER: inventario_user
       DB_PASSWORD: inventario_pass
       DB_NAME: inventario_db
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+      PYTHONUTF8: "1"
     depends_on:
       db-setup:
         condition: service_completed_successfully

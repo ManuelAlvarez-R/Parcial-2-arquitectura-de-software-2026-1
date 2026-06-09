@@ -1,4 +1,10 @@
-CREATE DATABASE IF NOT EXISTS inventario_db;
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+
+CREATE DATABASE IF NOT EXISTS inventario_db
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
 USE inventario_db;
 
 CREATE TABLE IF NOT EXISTS productos (
@@ -7,13 +13,13 @@ CREATE TABLE IF NOT EXISTS productos (
     descripcion TEXT,
     precio_unitario DECIMAL(10, 2) NOT NULL,
     categoria VARCHAR(100) NOT NULL
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS almacenes (
     id INT PRIMARY KEY,
     nombre VARCHAR(150) NOT NULL,
     direccion VARCHAR(255) NOT NULL
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS inventario (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -23,7 +29,7 @@ CREATE TABLE IF NOT EXISTS inventario (
     CONSTRAINT fk_inventario_producto FOREIGN KEY (producto_id) REFERENCES productos(id),
     CONSTRAINT fk_inventario_almacen FOREIGN KEY (almacen_id) REFERENCES almacenes(id),
     CONSTRAINT uq_producto_almacen UNIQUE (producto_id, almacen_id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO almacenes (id, nombre, direccion) VALUES
     (1, 'Almacén Central Bogotá', 'Calle 100 # 15-20, Bogotá'),

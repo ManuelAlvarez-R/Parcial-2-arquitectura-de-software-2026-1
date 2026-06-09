@@ -3,7 +3,7 @@ const GRAPHQL_URL = "/graphql";
 async function ejecutarGraphQL(query, variables = {}) {
     const response = await fetch(GRAPHQL_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json; charset=utf-8" },
         body: JSON.stringify({ query, variables }),
     });
     return response.json();
