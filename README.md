@@ -151,7 +151,11 @@ uvicorn app.main:app --reload
 ## Integrantes
 
 Equipo 4 — Arquitectura de Software
+
 Manuel Felipe Alvarez Rua
+
 Luis Carlos Vanegas Zapata
+
 Andrés Eduardo Pabón Roldán
+
 Estefanía Garcés Pérez
